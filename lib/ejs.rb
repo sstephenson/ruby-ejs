@@ -27,7 +27,7 @@ module EJS
       replace_evaluation_tags!(source, options)
       escape_whitespace!(source)
 
-      "function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};" +
+      "function(obj){var __p=[];" +
         "with(obj||{}){__p.push('#{source}');}return __p.join('');}"
     end
 
