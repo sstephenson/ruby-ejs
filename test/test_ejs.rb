@@ -143,4 +143,8 @@ class EJSEvaluationTest < Test::Unit::TestCase
     template = "<? if(foo == 'bar'){ ?>Statement quotes and 'quotes'.<? } ?>"
     assert_equal "Statement quotes and 'quotes'.", EJS.evaluate(template, { :foo => "bar" }, QUESTION_MARK_SYNTAX)
   end
+
+  test "'this' should be provided object" do
+    assert_equal "Property Value", EJS.evaluate("<%= this.property %>", { :property => "Property Value" })
+  end
 end

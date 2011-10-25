@@ -28,7 +28,7 @@ module EJS
       escape_whitespace!(source)
 
       "function(obj){var __p=[];" +
-        "with(obj||{}){__p.push('#{source}');}return __p.join('');}"
+        "(function(){with(this){__p.push('#{source}');}}.call(obj||{}));return __p.join('');}"
     end
 
     # Evaluates an EJS template with the given local variables and
