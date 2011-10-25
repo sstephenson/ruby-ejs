@@ -27,8 +27,8 @@ module EJS
       replace_evaluation_tags!(source, options)
       escape_whitespace!(source)
 
-      "function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};" +
-        "with(obj||{}){__p.push('#{source}');}return __p.join('');}"
+      "function(obj){var __p=[];" +
+        "(function(){with(this){__p.push('#{source}');}}.call(obj||{}));return __p.join('');}"
     end
 
     # Evaluates an EJS template with the given local variables and
