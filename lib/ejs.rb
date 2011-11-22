@@ -8,6 +8,7 @@ module EJS
   class << self
     attr_accessor :evaluation_pattern
     attr_accessor :interpolation_pattern
+    attr_accessor :interpolation_safe_pattern
 
     # Compiles an EJS template to a JavaScript function. The compiled
     # function takes an optional argument, an object specifying local
@@ -23,11 +24,12 @@ module EJS
       source = source.dup
 
       escape_quotes!(source)
+      replace_interpolation_safe_tags!(source, options)
       replace_interpolation_tags!(source, options)
       replace_evaluation_tags!(source, options)
       escape_whitespace!(source)
-
-      "function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};" +
+      "function(obj){var _e=function(s){return ((s==null?'':s)+'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}, " + 
+        "__p=[],print=function(){__p.push.apply(__p,arguments);};" +
         "with(obj||{}){__p.push('#{source}');}return __p.join('');}"
     end
 
@@ -57,6 +59,12 @@ module EJS
         end
       end
 
+      def replace_interpolation_safe_tags!(source, options)
+        source.gsub!(options[:interpolation_safe_pattern] || interpolation_safe_pattern) do
+          "',_e(" + $1.gsub(/\\'/, "'") + "),'"
+        end
+      end
+      
       def replace_interpolation_tags!(source, options)
         source.gsub!(options[:interpolation_pattern] || interpolation_pattern) do
           "'," + $1.gsub(/\\'/, "'") + ",'"
@@ -71,5 +79,6 @@ module EJS
   end
 
   self.evaluation_pattern = /<%([\s\S]+?)%>/
-  self.interpolation_pattern = /<%=([\s\S]+?)%>/
+  self.interpolation_safe_pattern = /<%=([\s\S]+?)%>/
+  self.interpolation_pattern = /<%:([\s\S]+?)%>/
 end
