@@ -93,6 +93,16 @@ class EJSEvaluationTest < Test::Unit::TestCase
     assert_equal "This is \\ridanculous", EJS.evaluate(template, :thing => "This")
   end
 
+  test "not escaping" do
+    template = "Hello <%: content %>"
+    assert_equal "Hello <XSS>", EJS.evaluate(template, :content => "<XSS>")
+  end
+
+  test "escaping" do
+    template = "Hello <%= content %>"
+    assert_equal "Hello &lt;XSS&gt; &amp; co", EJS.evaluate(template, :content => "<XSS> & co")
+  end
+
   test "iteration" do
     template = "<ul><%
       for (var i = 0; i < people.length; i++) {
