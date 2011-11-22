@@ -10,6 +10,8 @@ module EJS
     attr_accessor :interpolation_pattern
     attr_accessor :interpolation_safe_pattern
 
+    ESCAPE_FUNCTION = "__e=function(s){return ((s==null?'':s)+'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}".freeze
+
     # Compiles an EJS template to a JavaScript function. The compiled
     # function takes an optional argument, an object specifying local
     # variables in the template.  You can optionally pass the
@@ -28,7 +30,7 @@ module EJS
       replace_interpolation_tags!(source, options)
       replace_evaluation_tags!(source, options)
       escape_whitespace!(source)
-      "function(obj){var _e=function(s){return ((s==null?'':s)+'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}, " + 
+      "function(obj){var #{ESCAPE_FUNCTION}," +
         "__p=[],print=function(){__p.push.apply(__p,arguments);};" +
         "with(obj||{}){__p.push('#{source}');}return __p.join('');}"
     end
@@ -61,7 +63,7 @@ module EJS
 
       def replace_interpolation_safe_tags!(source, options)
         source.gsub!(options[:interpolation_safe_pattern] || interpolation_safe_pattern) do
-          "',_e(" + $1.gsub(/\\'/, "'") + "),'"
+          "',__e(" + $1.gsub(/\\'/, "'") + "),'"
         end
       end
       
