@@ -103,6 +103,11 @@ class EJSEvaluationTest < Test::Unit::TestCase
     assert_equal "Hello &lt;XSS&gt; &amp; co", EJS.evaluate(template, :content => "<XSS> & co")
   end
 
+  test "escaping null and 0" do
+    template = "Hello <%= null %> <%= 0 %>"
+    assert_equal "Hello  0", EJS.evaluate(template)
+  end
+
   test "iteration" do
     template = "<ul><%
       for (var i = 0; i < people.length; i++) {
