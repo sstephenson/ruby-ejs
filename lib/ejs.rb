@@ -5,12 +5,15 @@
 # http://documentcloud.github.com/underscore/
 
 module EJS
+  DEFAULT_ESCAPE_FUNCTION_NAME = '__e'.freeze
+  DEFAULT_ESCAPE_FUNCTION = "#{DEFAULT_ESCAPE_FUNCTION_NAME}=function(s){" +
+      "return ((s==null?'':s)+'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}".freeze
+
   class << self
     attr_accessor :evaluation_pattern
     attr_accessor :interpolation_pattern
     attr_accessor :interpolation_safe_pattern
-
-    ESCAPE_FUNCTION = "__e=function(s){return ((s==null?'':s)+'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}".freeze
+    attr_accessor :escape_function_name
 
     # Compiles an EJS template to a JavaScript function. The compiled
     # function takes an optional argument, an object specifying local
@@ -30,7 +33,7 @@ module EJS
       replace_interpolation_tags!(source, options)
       replace_evaluation_tags!(source, options)
       escape_whitespace!(source)
-      "function(obj){var #{ESCAPE_FUNCTION}," +
+      "function(obj){var #{escape_function_if_required}" +
         "__p=[],print=function(){__p.push.apply(__p,arguments);};" +
         "with(obj||{}){__p.push('#{source}');}return __p.join('');}"
     end
@@ -63,7 +66,7 @@ module EJS
 
       def replace_interpolation_safe_tags!(source, options)
         source.gsub!(options[:interpolation_safe_pattern] || interpolation_safe_pattern) do
-          "',__e(" + $1.gsub(/\\'/, "'") + "),'"
+          "',#{escape_function_name}(" + $1.gsub(/\\'/, "'") + "),'"
         end
       end
       
@@ -78,9 +81,14 @@ module EJS
         source.gsub!(/\n/, '\\n')
         source.gsub!(/\t/, '\\t')
       end
+
+      def escape_function_if_required
+        DEFAULT_ESCAPE_FUNCTION + ',' if escape_function_name == DEFAULT_ESCAPE_FUNCTION_NAME
+      end
   end
 
   self.evaluation_pattern = /<%([\s\S]+?)%>/
   self.interpolation_safe_pattern = /<%=([\s\S]+?)%>/
   self.interpolation_pattern = /<%:([\s\S]+?)%>/
+  self.escape_function_name = DEFAULT_ESCAPE_FUNCTION_NAME
 end

@@ -21,6 +21,23 @@ module TestHelper
   end
 end
 
+class EJSTest < Test::Unit::TestCase
+  extend TestHelper
+
+  test "escape function if required when default" do
+    assert EJS.send(:escape_function_if_required)
+  end
+
+  test "escape function if required when _.escape" do
+    begin
+      EJS.escape_function_name = '_.escape'
+      assert_nil EJS.send(:escape_function_if_required)
+    ensure
+      EJS.escape_function_name = EJS::DEFAULT_ESCAPE_FUNCTION_NAME
+    end
+  end
+end
+
 class EJSCompilationTest < Test::Unit::TestCase
   extend TestHelper
 
