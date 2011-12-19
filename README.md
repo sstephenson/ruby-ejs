@@ -14,6 +14,19 @@ function:
     EJS.compile("Hello <%= name %>")
     # => "function(obj){...}"
 
+Using the default syntax `<%= content %>`, content is escaped, à la Rails 3. For unescaped content, use the unescaped syntax `<%: content %>`.
+
+    EJS.compile("Hello <%: name %>")
+    # => "function(obj){...}"
+    
+About the js escape function : 
+
+By default, js is escaped using a function injected in **each** template. To avoid that, save some kb and be more DRY, you can specify your own escape function :
+
+    # Example : to use underscore.js escape function, put this in an initializer file (ex. config/initializers/ejs.rb)
+    EJS.escape_function_name = '_.escape'
+
+
 Invoke the function in a JavaScript environment to produce a string
 value. You can pass an optional object specifying local variables for
 template evaluation.
