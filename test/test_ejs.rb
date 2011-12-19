@@ -5,17 +5,36 @@ FUNCTION_PATTERN = /^function\s*\(.*?\)\s*\{(.*?)\}$/
 
 BRACE_SYNTAX = {
   :evaluation_pattern    => /\{\{([\s\S]+?)\}\}/,
-  :interpolation_pattern => /\{\{=([\s\S]+?)\}\}/
+  :interpolation_pattern => /\{\{:([\s\S]+?)\}\}/,
+  :interpolation_safe_pattern => /\{\{=([\s\S]+?)\}\}/
 }
 
 QUESTION_MARK_SYNTAX = {
   :evaluation_pattern    => /<\?([\s\S]+?)\?>/,
-  :interpolation_pattern => /<\?=([\s\S]+?)\?>/
+  :interpolation_pattern => /<\?:([\s\S]+?)\?>/,
+  :interpolation_safe_pattern => /<\?=([\s\S]+?)\?>/
 }
 
 module TestHelper
   def test(name, &block)
     define_method("test #{name.inspect}", &block)
+  end
+end
+
+class EJSTest < Test::Unit::TestCase
+  extend TestHelper
+
+  test "escape function if required when default" do
+    assert EJS.send(:escape_function_if_required)
+  end
+
+  test "escape function if required when _.escape" do
+    begin
+      EJS.escape_function_name = '_.escape'
+      assert_nil EJS.send(:escape_function_if_required)
+    ensure
+      EJS.escape_function_name = EJS::DEFAULT_ESCAPE_FUNCTION_NAME
+    end
   end
 end
 
@@ -29,6 +48,14 @@ class EJSCompilationTest < Test::Unit::TestCase
   end
 
   test "compile with custom syntax" do
+    standard_result = EJS.compile("Hello <%: name %>")
+    braced_result   = EJS.compile("Hello {{: name }}", BRACE_SYNTAX)
+
+    assert_match FUNCTION_PATTERN, braced_result
+    assert_equal standard_result, braced_result
+  end
+
+  test "compile safe tags with custom syntax " do
     standard_result = EJS.compile("Hello <%= name %>")
     braced_result   = EJS.compile("Hello {{= name }}", BRACE_SYNTAX)
 
@@ -41,14 +68,17 @@ class EJSCustomPatternTest < Test::Unit::TestCase
   extend TestHelper
 
   def setup
+    @original_safe_interpolation_pattern = EJS.interpolation_safe_pattern
     @original_evaluation_pattern = EJS.evaluation_pattern
     @original_interpolation_pattern = EJS.interpolation_pattern
     EJS.evaluation_pattern = BRACE_SYNTAX[:evaluation_pattern]
     EJS.interpolation_pattern = BRACE_SYNTAX[:interpolation_pattern]
+    EJS.interpolation_safe_pattern = BRACE_SYNTAX[:interpolation_safe_pattern]
   end
 
   def teardown
     EJS.interpolation_pattern = @original_interpolation_pattern
+    EJS.interpolation_safe_pattern = @original_safe_interpolation_pattern
     EJS.evaluation_pattern = @original_evaluation_pattern
   end
 
@@ -78,6 +108,21 @@ class EJSEvaluationTest < Test::Unit::TestCase
   test "backslashes" do
     template = "<%= thing %> is \\ridanculous"
     assert_equal "This is \\ridanculous", EJS.evaluate(template, :thing => "This")
+  end
+
+  test "not escaping" do
+    template = "Hello <%: content %>"
+    assert_equal "Hello <XSS>", EJS.evaluate(template, :content => "<XSS>")
+  end
+
+  test "escaping" do
+    template = "Hello <%= content %>"
+    assert_equal "Hello &lt;XSS&gt; &amp; co", EJS.evaluate(template, :content => "<XSS> & co")
+  end
+
+  test "escaping null and 0" do
+    template = "Hello <%= null %> <%= 0 %>"
+    assert_equal "Hello  0", EJS.evaluate(template)
   end
 
   test "iteration" do
