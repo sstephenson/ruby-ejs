@@ -8,6 +8,7 @@ module EJS
   class << self
     attr_accessor :evaluation_pattern
     attr_accessor :interpolation_pattern
+    attr_accessor :escape_pattern
 
     # Compiles an EJS template to a JavaScript function. The compiled
     # function takes an optional argument, an object specifying local
@@ -23,6 +24,7 @@ module EJS
       source = source.dup
 
       escape_quotes!(source)
+      replace_escape_tags!(source, options)
       replace_interpolation_tags!(source, options)
       replace_evaluation_tags!(source, options)
       escape_whitespace!(source)
@@ -51,6 +53,12 @@ module EJS
         source.gsub!(/'/) { "\\'" }
       end
 
+      def replace_escape_tags!(source, options)
+        source.gsub!(options[:escape_pattern] || escape_pattern) do
+          "',(''+" + $1.gsub(/\\'/, "'") + ")#{escape_function},'"
+        end
+      end
+
       def replace_evaluation_tags!(source, options)
         source.gsub!(options[:evaluation_pattern] || evaluation_pattern) do
           "');" + $1.gsub(/\\'/, "'").gsub(/[\r\n\t]/, ' ') + "__p.push('"
@@ -68,8 +76,18 @@ module EJS
         source.gsub!(/\n/, '\\n')
         source.gsub!(/\t/, '\\t')
       end
+
+      def escape_function
+        ".replace(/&/g, '&amp;')" +
+        ".replace(/</g, '&lt;')" +
+        ".replace(/>/g, '&gt;')" +
+        ".replace(/\"/g, '&quot;')" +
+        ".replace(/'/g, '&#x27;')" +
+        ".replace(/\\//g,'&#x2F;')"
+      end
   end
 
   self.evaluation_pattern = /<%([\s\S]+?)%>/
   self.interpolation_pattern = /<%=([\s\S]+?)%>/
+  self.escape_pattern = /<%-([\s\S]+?)%>/
 end

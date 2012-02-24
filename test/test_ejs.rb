@@ -5,12 +5,14 @@ FUNCTION_PATTERN = /^function\s*\(.*?\)\s*\{(.*?)\}$/
 
 BRACE_SYNTAX = {
   :evaluation_pattern    => /\{\{([\s\S]+?)\}\}/,
-  :interpolation_pattern => /\{\{=([\s\S]+?)\}\}/
+  :interpolation_pattern => /\{\{=([\s\S]+?)\}\}/,
+  :escape_pattern        => /\{\{-([\s\S]+?)\}\}/
 }
 
 QUESTION_MARK_SYNTAX = {
   :evaluation_pattern    => /<\?([\s\S]+?)\?>/,
-  :interpolation_pattern => /<\?=([\s\S]+?)\?>/
+  :interpolation_pattern => /<\?=([\s\S]+?)\?>/,
+  :escape_pattern        => /<\?-([\s\S]+?)\?>/
 }
 
 module TestHelper
@@ -142,5 +144,47 @@ class EJSEvaluationTest < Test::Unit::TestCase
   test "question-marked quote in statement and body" do
     template = "<? if(foo == 'bar'){ ?>Statement quotes and 'quotes'.<? } ?>"
     assert_equal "Statement quotes and 'quotes'.", EJS.evaluate(template, { :foo => "bar" }, QUESTION_MARK_SYNTAX)
+  end
+
+  test "escaping" do
+    template = "<%- foobar %>"
+    assert_equal "&lt;b&gt;Foo Bar&lt;&#x2F;b&gt;", EJS.evaluate(template, { :foobar => "<b>Foo Bar</b>" })
+
+    template = "<%- foobar %>"
+    assert_equal "Foo &amp; Bar", EJS.evaluate(template, { :foobar => "Foo & Bar" })
+
+    template = "<%- foobar %>"
+    assert_equal "&quot;Foo Bar&quot;", EJS.evaluate(template, { :foobar => '"Foo Bar"' })
+
+    template = "<%- foobar %>"
+    assert_equal "&#x27;Foo Bar&#x27;", EJS.evaluate(template, { :foobar => "'Foo Bar'" })
+  end
+
+  test "braced escaping" do
+    template = "{{- foobar }}"
+    assert_equal "&lt;b&gt;Foo Bar&lt;&#x2F;b&gt;", EJS.evaluate(template, { :foobar => "<b>Foo Bar</b>" }, BRACE_SYNTAX)
+
+    template = "{{- foobar }}"
+    assert_equal "Foo &amp; Bar", EJS.evaluate(template, { :foobar => "Foo & Bar" }, BRACE_SYNTAX)
+
+    template = "{{- foobar }}"
+    assert_equal "&quot;Foo Bar&quot;", EJS.evaluate(template, { :foobar => '"Foo Bar"' }, BRACE_SYNTAX)
+
+    template = "{{- foobar }}"
+    assert_equal "&#x27;Foo Bar&#x27;", EJS.evaluate(template, { :foobar => "'Foo Bar'" }, BRACE_SYNTAX)
+  end
+
+  test "question-mark escaping" do
+    template = "<?- foobar ?>"
+    assert_equal "&lt;b&gt;Foo Bar&lt;&#x2F;b&gt;", EJS.evaluate(template, { :foobar => "<b>Foo Bar</b>" }, QUESTION_MARK_SYNTAX)
+
+    template = "<?- foobar ?>"
+    assert_equal "Foo &amp; Bar", EJS.evaluate(template, { :foobar => "Foo & Bar" }, QUESTION_MARK_SYNTAX)
+
+    template = "<?- foobar ?>"
+    assert_equal "&quot;Foo Bar&quot;", EJS.evaluate(template, { :foobar => '"Foo Bar"' }, QUESTION_MARK_SYNTAX)
+
+    template = "<?- foobar ?>"
+    assert_equal "&#x27;Foo Bar&#x27;", EJS.evaluate(template, { :foobar => "'Foo Bar'" }, QUESTION_MARK_SYNTAX)
   end
 end
