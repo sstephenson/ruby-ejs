@@ -53,7 +53,7 @@ module EJS
 
       def replace_evaluation_tags!(source, options)
         source.gsub!(options[:evaluation_pattern] || evaluation_pattern) do
-          "');" + $1.gsub(/\\'/, "'").gsub(/[\r\n\t]/, ' ') + "__p.push('"
+          "');" + $1.gsub(/\\'/, "'").gsub(/[\r\n\t]/, ' ') + "; __p.push('"
         end
       end
 
