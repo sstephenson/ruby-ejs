@@ -1,6 +1,4 @@
 # EJS (Embedded JavaScript) template compiler for Ruby
-# (c) 2011 Sam Stephenson
-#
 # This is a port of Underscore.js' `_.template` function:
 # http://documentcloud.github.com/underscore/
 

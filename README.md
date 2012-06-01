@@ -34,6 +34,6 @@ template and an optional hash of local variables to `EJS.evaluate`:
 
 -----
 
-&copy; 2011 Sam Stephenson
+&copy; 2012 Sam Stephenson
 
 Released under the MIT license
