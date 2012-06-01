@@ -80,6 +80,11 @@ class EJSEvaluationTest < Test::Unit::TestCase
     assert_equal "This is \\ridanculous", EJS.evaluate(template, :thing => "This")
   end
 
+  test "implicit semicolon" do
+    template = "<% var foo = 'bar' %>"
+    assert_equal '', EJS.evaluate(template)
+  end
+
   test "iteration" do
     template = "<ul><%
       for (var i = 0; i < people.length; i++) {
