@@ -3,6 +3,20 @@
 # http://documentcloud.github.com/underscore/
 
 module EJS
+  JS_UNESCAPES = {
+     '\\' => '\\',
+     "'" => "'",
+     'r' => "\r",
+     'n' => "\n",
+     't' => "\t",
+     'u2028' => "\u2028",
+     'u2029' => "\u2029"
+   }
+   JS_UNESCAPE_PATTERN = /\\(#{JS_UNESCAPES.keys})/
+
+   JS_ESCAPES = JS_UNESCAPES.invert
+   JS_ESCAPE_PATTERN = Regexp.union(*JS_ESCAPES.keys)
+  
   class << self
     attr_accessor :evaluation_pattern
     attr_accessor :interpolation_pattern
@@ -21,12 +35,10 @@ module EJS
     def compile(source, options = {})
       source = source.dup
 
-      escape_quotes!(source)
+      js_escape!(source)
       replace_escape_tags!(source, options)
       replace_interpolation_tags!(source, options)
       replace_evaluation_tags!(source, options)
-      escape_whitespace!(source)
-
       "function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};" +
         "with(obj||{}){__p.push('#{source}');}return __p.join('');}"
     end
@@ -46,33 +58,32 @@ module EJS
     end
 
     protected
-      def escape_quotes!(source)
-        source.gsub!(/\\/) { '\\\\' }
-        source.gsub!(/'/) { "\\'" }
+      def js_escape!(source)
+        source.gsub!(JS_ESCAPE_PATTERN) { |match| '\\' + JS_ESCAPES[match] }
+        source
+      end
+
+      def js_unescape!(source)
+        source.gsub!(JS_UNESCAPE_PATTERN) { |match| JS_UNESCAPES[match[1..-1]] }
+        source
       end
 
       def replace_escape_tags!(source, options)
         source.gsub!(options[:escape_pattern] || escape_pattern) do
-          "',(''+" + $1.gsub(/\\'/, "'") + ")#{escape_function},'"
+          "',(''+#{js_unescape!($1)})#{escape_function},'"
         end
       end
 
       def replace_evaluation_tags!(source, options)
         source.gsub!(options[:evaluation_pattern] || evaluation_pattern) do
-          "');" + $1.gsub(/\\'/, "'").gsub(/[\r\n\t]/, ' ') + "; __p.push('"
+          "'); #{js_unescape!($1)}; __p.push('"
         end
       end
 
       def replace_interpolation_tags!(source, options)
         source.gsub!(options[:interpolation_pattern] || interpolation_pattern) do
-          "'," + $1.gsub(/\\'/, "'") + ",'"
+          "', #{js_unescape!($1)},'"
         end
-      end
-
-      def escape_whitespace!(source)
-        source.gsub!(/\r/, '\\r')
-        source.gsub!(/\n/, '\\n')
-        source.gsub!(/\t/, '\\t')
       end
 
       def escape_function
