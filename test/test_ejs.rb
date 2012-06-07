@@ -82,6 +82,11 @@ class EJSEvaluationTest < Test::Unit::TestCase
     assert_equal "This is \\ridanculous", EJS.evaluate(template, :thing => "This")
   end
 
+  test "backslashes into interpolation" do
+    template = %q{<%= "Hello \"World\"" %>}
+    assert_equal 'Hello "World"', EJS.evaluate(template)
+  end
+
   test "implicit semicolon" do
     template = "<% var foo = 'bar' %>"
     assert_equal '', EJS.evaluate(template)
