@@ -4,19 +4,18 @@
 
 module EJS
   JS_UNESCAPES = {
-     '\\' => '\\',
-     "'" => "'",
-     'r' => "\r",
-     'n' => "\n",
-     't' => "\t",
-     'u2028' => "\u2028",
-     'u2029' => "\u2029"
-   }
-   JS_UNESCAPE_PATTERN = /\\(#{JS_UNESCAPES.keys})/
+    '\\' => '\\',
+    "'" => "'",
+    'r' => "\r",
+    'n' => "\n",
+    't' => "\t",
+    'u2028' => "\u2028",
+    'u2029' => "\u2029"
+  }
+  JS_ESCAPES = JS_UNESCAPES.invert
+  JS_UNESCAPE_PATTERN = /\\(#{Regexp.union(JS_UNESCAPES.keys)})/
+  JS_ESCAPE_PATTERN = Regexp.union(JS_ESCAPES.keys)
 
-   JS_ESCAPES = JS_UNESCAPES.invert
-   JS_ESCAPE_PATTERN = Regexp.union(*JS_ESCAPES.keys)
-  
   class << self
     attr_accessor :evaluation_pattern
     attr_accessor :interpolation_pattern
