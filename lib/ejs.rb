@@ -68,20 +68,20 @@ module EJS
       end
 
       def replace_escape_tags!(source, options)
-        source.gsub!(options[:escape_pattern] || escape_pattern) do
-          "',(''+#{js_unescape!($1)})#{escape_function},'"
+        source.gsub!(options[:escape_pattern] || escape_pattern) do |match|
+          "',(''+#{js_unescape!(match)})#{escape_function},'"
         end
       end
 
       def replace_evaluation_tags!(source, options)
-        source.gsub!(options[:evaluation_pattern] || evaluation_pattern) do
-          "'); #{js_unescape!($1)}; __p.push('"
+        source.gsub!(options[:evaluation_pattern] || evaluation_pattern) do |match|
+          "'); #{js_unescape!(match)}; __p.push('"
         end
       end
 
       def replace_interpolation_tags!(source, options)
-        source.gsub!(options[:interpolation_pattern] || interpolation_pattern) do
-          "', #{js_unescape!($1)},'"
+        source.gsub!(options[:interpolation_pattern] || interpolation_pattern) do |match|
+          "', #{js_unescape!(match)},'"
         end
       end
 
