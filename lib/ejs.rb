@@ -20,6 +20,7 @@ module EJS
     attr_accessor :evaluation_pattern
     attr_accessor :interpolation_pattern
     attr_accessor :escape_pattern
+    attr_accessor :escape_function
 
     # Compiles an EJS template to a JavaScript function. The compiled
     # function takes an optional argument, an object specifying local
@@ -69,7 +70,8 @@ module EJS
 
       def replace_escape_tags!(source, options)
         source.gsub!(options[:escape_pattern] || escape_pattern) do
-          "',(''+#{js_unescape!($1)})#{escape_function},'"
+          expression = "(''+#{js_unescape!($1)})"
+          "',#{runtime_escape!(expression)},'"
         end
       end
 
@@ -85,17 +87,19 @@ module EJS
         end
       end
 
-      def escape_function
-        ".replace(/&/g, '&amp;')" +
-        ".replace(/</g, '&lt;')" +
-        ".replace(/>/g, '&gt;')" +
-        ".replace(/\"/g, '&quot;')" +
-        ".replace(/'/g, '&#x27;')" +
-        ".replace(/\\//g,'&#x2F;')"
+      def runtime_escape!(expression)
+        escape_function % expression
       end
   end
 
   self.evaluation_pattern = /<%([\s\S]+?)%>/
   self.interpolation_pattern = /<%=([\s\S]+?)%>/
   self.escape_pattern = /<%-([\s\S]+?)%>/
+  self.escape_function =
+    "%s.replace(/&/g, '&amp;')" +
+    ".replace(/</g, '&lt;')" +
+    ".replace(/>/g, '&gt;')" +
+    ".replace(/\"/g, '&quot;')" +
+    ".replace(/'/g, '&#x27;')" +
+    ".replace(/\\//g,'&#x2F;')"
 end
