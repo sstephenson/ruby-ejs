@@ -39,6 +39,25 @@ class EJSCompilationTest < Test::Unit::TestCase
   end
 end
 
+class EJSCustomEscapeFunctionTest < Test::Unit::TestCase
+  extend TestHelper
+
+  def setup
+    @original_escape_function = EJS.escape_function
+    EJS.escape_function = '_.escape(%s)'
+  end
+
+  def teardown
+    EJS.escape_function = @original_escape_function
+  end
+
+  test 'compile' do
+    result = EJS.compile('<%- name %>')
+    assert_match /_\.escape\(\s*name\s*\)/, result
+  end
+
+end
+
 class EJSCustomPatternTest < Test::Unit::TestCase
   extend TestHelper
 
