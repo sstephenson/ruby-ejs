@@ -70,8 +70,7 @@ module EJS
 
       def replace_escape_tags!(source, options)
         source.gsub!(options[:escape_pattern] || escape_pattern) do
-          expression = "(''+#{js_unescape!($1)})"
-          "',#{runtime_escape!(expression)},'"
+          "',#{runtime_escape!(js_unescape!($1))},'"
         end
       end
 
@@ -96,7 +95,7 @@ module EJS
   self.interpolation_pattern = /<%=([\s\S]+?)%>/
   self.escape_pattern = /<%-([\s\S]+?)%>/
   self.escape_function =
-    "%s.replace(/&/g, '&amp;')" +
+    "('' + %s).replace(/&/g, '&amp;')" +
     ".replace(/</g, '&lt;')" +
     ".replace(/>/g, '&gt;')" +
     ".replace(/\"/g, '&quot;')" +

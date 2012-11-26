@@ -53,7 +53,7 @@ class EJSCustomEscapeFunctionTest < Test::Unit::TestCase
 
   test 'compile' do
     result = EJS.compile('<%- name %>')
-    assert_match /_\.escape\(.+\)/, result
+    assert_match /_\.escape\(\s*name\s*\)/, result
   end
 
 end
