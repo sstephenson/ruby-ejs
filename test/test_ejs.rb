@@ -209,4 +209,10 @@ class EJSVariableNameTest < Test::Unit::TestCase
     assert_no_match(%r(with), result)
     EJS.variable_name = nil
   end
+  test 'compile without custom variable name' do
+    EJS.variable_name = nil
+    result = EJS.compile("Hello")
+    assert_match(%r(function\(obj\)), result)
+    assert_match(%r(with\(obj\|\|{}\)), result)
+  end
 end
