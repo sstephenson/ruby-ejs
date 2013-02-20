@@ -198,3 +198,15 @@ class EJSEvaluationTest < Test::Unit::TestCase
     assert_equal "&#x27;Foo Bar&#x27;", EJS.evaluate(template, { :foobar => "'Foo Bar'" }, QUESTION_MARK_SYNTAX)
   end
 end
+
+class EJSVariableNameTest < Test::Unit::TestCase
+  extend TestHelper
+
+  test "compile with custom variable name" do
+    EJS.variable_name = 'data'
+    result = EJS.compile("Hello")
+    assert_match(%r(function\(data\)), result)
+    assert_no_match(%r(with), result)
+    EJS.variable_name = nil
+  end
+end

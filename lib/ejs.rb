@@ -20,6 +20,7 @@ module EJS
     attr_accessor :evaluation_pattern
     attr_accessor :interpolation_pattern
     attr_accessor :escape_pattern
+    attr_accessor :variable_name
 
     # Compiles an EJS template to a JavaScript function. The compiled
     # function takes an optional argument, an object specifying local
@@ -38,10 +39,21 @@ module EJS
       replace_escape_tags!(source, options)
       replace_interpolation_tags!(source, options)
       replace_evaluation_tags!(source, options)
-      "function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};" +
-        "with(obj||{}){__p.push('#{source}');}return __p.join('');}"
+      source = assemble_source(source);
+      "function(#{variable_name || 'obj'}){" +
+        "var __p=[],print=function(){__p.push.apply(__p,arguments);};" +
+        "#{source}" +
+        "return __p.join('');}"
     end
 
+    # build string to use as source
+    def assemble_source(source)
+      source = "__p.push('#{source}');"
+      if !variable_name
+        source = "with(obj||{}){#{source}}";
+      end
+      source
+    end
     # Evaluates an EJS template with the given local variables and
     # compiler options. You will need the ExecJS
     # (https://github.com/sstephenson/execjs/) library and a
