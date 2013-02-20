@@ -39,7 +39,7 @@ module EJS
       replace_escape_tags!(source, options)
       replace_interpolation_tags!(source, options)
       replace_evaluation_tags!(source, options)
-      source = assemble_source(source);
+      source = assemble_source(source)
       "function(#{variable_name || 'obj'}){" +
         "var __p=[],print=function(){__p.push.apply(__p,arguments);};" +
         "#{source}" +
