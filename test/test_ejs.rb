@@ -168,6 +168,12 @@ class EJSEvaluationTest < Test::Unit::TestCase
 
     template = "<%- foobar %>"
     assert_equal "&#x27;Foo Bar&#x27;", EJS.evaluate(template, { :foobar => "'Foo Bar'" })
+
+    template = "<%- null %>"
+    assert_equal "", EJS.evaluate(template, {})
+
+    template = "<%- undefined %>"
+    assert_equal "", EJS.evaluate(template, {})
   end
 
   test "braced escaping" do
@@ -182,6 +188,12 @@ class EJSEvaluationTest < Test::Unit::TestCase
 
     template = "{{- foobar }}"
     assert_equal "&#x27;Foo Bar&#x27;", EJS.evaluate(template, { :foobar => "'Foo Bar'" }, BRACE_SYNTAX)
+
+    template = "{{- null }}"
+    assert_equal "", EJS.evaluate(template, {}, BRACE_SYNTAX)
+
+    template = "{{- undefined }}"
+    assert_equal "", EJS.evaluate(template, {}, BRACE_SYNTAX)
   end
 
   test "question-mark escaping" do
@@ -196,5 +208,11 @@ class EJSEvaluationTest < Test::Unit::TestCase
 
     template = "<?- foobar ?>"
     assert_equal "&#x27;Foo Bar&#x27;", EJS.evaluate(template, { :foobar => "'Foo Bar'" }, QUESTION_MARK_SYNTAX)
+
+    template = "<?- null ?>"
+    assert_equal "", EJS.evaluate(template, {}, QUESTION_MARK_SYNTAX)
+
+    template = "<?- undefined ?>"
+    assert_equal "", EJS.evaluate(template, {}, QUESTION_MARK_SYNTAX)
   end
 end
