@@ -69,7 +69,7 @@ module EJS
 
       def replace_escape_tags!(source, options)
         source.gsub!(options[:escape_pattern] || escape_pattern) do
-          "',(''+#{js_unescape!($1)})#{escape_function},'"
+          "',#{coerce_to_string_function}(#{js_unescape!($1)})#{escape_function},'"
         end
       end
 
@@ -83,6 +83,12 @@ module EJS
         source.gsub!(options[:interpolation_pattern] || interpolation_pattern) do
           "', #{js_unescape!($1)},'"
         end
+      end
+
+      def coerce_to_string_function
+        "function(s) {" +
+          "return (s === null || typeof(s) === 'undefined') ? '' : ('' + s);" +
+        "}"
       end
 
       def escape_function
