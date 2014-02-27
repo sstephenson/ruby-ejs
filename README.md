@@ -25,6 +25,25 @@ The EJS tag syntax is as follows:
   its string value into the template output.
 * `<%- ... %>` behaves like `<%= ... %>` but HTML-escapes its output.
 
+If a evalation tag (`<%=`) ends with an open function, the function
+return a compiled template. For example:
+
+```erb
+<% formTag = function(template) { return '<form>\n'+template()+'\n</form>'; } %>
+
+<%= formTag(function () { %>
+  <input type="submit" />
+<% }) %>
+```
+
+generates:
+
+```html
+<form>
+  <input type="submit" />
+</form>
+```
+
 If you have the [ExecJS](https://github.com/sstephenson/execjs/)
 library and a suitable JavaScript runtime installed, you can pass a
 template and an optional hash of local variables to `EJS.evaluate`:

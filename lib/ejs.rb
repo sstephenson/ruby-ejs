@@ -19,6 +19,7 @@ module EJS
   class << self
     attr_accessor :evaluation_pattern
     attr_accessor :interpolation_pattern
+    attr_accessor :interpolation_with_subtemplate_pattern
     attr_accessor :escape_pattern
 
     # Compiles an EJS template to a JavaScript function. The compiled
@@ -36,10 +37,22 @@ module EJS
 
       js_escape!(source)
       replace_escape_tags!(source, options)
+      replace_interpolation_with_subtemplate_tags!(source, options)
       replace_interpolation_tags!(source, options)
       replace_evaluation_tags!(source, options)
-      "function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};" +
-        "with(obj||{}){__p.push('#{source}');}return __p.join('');}"
+
+      <<-EJS
+        function(locals) {
+          var __p = [];
+          var print = function() { __p.push.apply(__p,arguments); };
+          
+          with(locals||{}) {
+            __p.push('#{source}');
+          }
+          
+          return __p.join('');
+        }
+      EJS
     end
 
     # Evaluates an EJS template with the given local variables and
@@ -73,6 +86,31 @@ module EJS
         end
       end
 
+      def replace_interpolation_with_subtemplate_tags!(source, options)
+        source.gsub!(options[:interpolation_with_subtemplate_pattern] || interpolation_with_subtemplate_pattern) do
+          lines = []
+          matches = [$1, $2, $3]
+          
+          replace_escape_tags!(matches[1], options)
+          replace_interpolation_with_subtemplate_tags!(matches[1], options)
+          replace_interpolation_tags!(matches[1], options)
+          replace_evaluation_tags!(matches[1], options)
+
+          lines << "', #{matches[0]}"
+          lines << <<-EJS
+              var __p = [];
+              var print = function() { __p.push.apply(__p,arguments); };
+              
+              __p.push('#{matches[1]}');
+              
+              return __p.join('');
+          EJS
+          lines << "#{matches[2]},'"
+          
+          lines.join("\n")
+        end
+      end
+      
       def replace_evaluation_tags!(source, options)
         source.gsub!(options[:evaluation_pattern] || evaluation_pattern) do
           "'); #{js_unescape!($1)}; __p.push('"
@@ -97,5 +135,6 @@ module EJS
 
   self.evaluation_pattern = /<%([\s\S]+?)%>/
   self.interpolation_pattern = /<%=([\s\S]+?)%>/
+  self.interpolation_with_subtemplate_pattern = /<%=((?:(?!%>)[\s\S])+{)\s*%>((?:(?!<%\s*})[\s\S])+)<%\s*((?:(?!%>)[\s\S])+)%>/m
   self.escape_pattern = /<%-([\s\S]+?)%>/
 end
