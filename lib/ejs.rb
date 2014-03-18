@@ -87,9 +87,11 @@ module EJS
       end
 
       def replace_interpolation_with_subtemplate_tags!(source, options)
-        source.gsub!(options[:interpolation_with_subtemplate_pattern] || interpolation_with_subtemplate_pattern) do
+        regex = options[:interpolation_with_subtemplate_pattern] || interpolation_with_subtemplate_pattern
+        source.gsub!(regex) do |str|
+          match_data = regex.match(str)
           lines = []
-          matches = [$1, $2, $3]
+          matches = [match_data[:start], match_data[:middle], match_data[:end]]
           
           replace_escape_tags!(matches[1], options)
           replace_interpolation_with_subtemplate_tags!(matches[1], options)
@@ -135,6 +137,24 @@ module EJS
 
   self.evaluation_pattern = /<%([\s\S]+?)%>/
   self.interpolation_pattern = /<%=([\s\S]+?)%>/
-  self.interpolation_with_subtemplate_pattern = /<%=((?:(?!%>)[\s\S])+{)\s*%>((?:(?!<%\s*})[\s\S])+)<%\s*((?:(?!%>)[\s\S])+)%>/m
   self.escape_pattern = /<%-([\s\S]+?)%>/
+  self.interpolation_with_subtemplate_pattern = %r{
+    <%=(?<start>(?:(?!%>)[\s\S])+\{)\s*%>
+    (?<middle>
+    (
+      (?<re>
+        <%=?(?:(?!%>)[\s\S])+\{\s*%>
+        (?:
+          \g<re>
+          |
+          .{1}
+        )*
+        <%\s*\}(?:(?!%>)[\s\S])+%>
+      )
+      |
+      .{1}
+    )*
+    )
+    <%\s*(?<end>\}(?:(?!%>)[\s\S])+)%>
+  }xm
 end
