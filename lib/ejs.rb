@@ -98,7 +98,7 @@ module EJS
           replace_interpolation_tags!(matches[1], options)
           replace_evaluation_tags!(matches[1], options)
 
-          lines << "', #{matches[0]}"
+          lines << "', #{js_unescape!(matches[0])}"
           lines << <<-EJS
               var __p = [];
               var print = function() { __p.push.apply(__p,arguments); };
@@ -107,7 +107,7 @@ module EJS
               
               return __p.join('');
           EJS
-          lines << "#{matches[2]},'"
+          lines << "#{js_unescape!(matches[2])},'"
           
           lines.join("\n")
         end
