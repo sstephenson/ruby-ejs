@@ -1,31 +1,68 @@
-require "ejs"
-require "test/unit"
+require 'test_helper'
 
-FUNCTION_PATTERN = /^function\s*\(.*?\)\s*\{(.*?)\}$/
+FUNCTION_PATTERN = /\A\s*function\s*\(.*?\)\s*\{(.*?)\}\Z/m
 
 BRACE_SYNTAX = {
   :evaluation_pattern    => /\{\{([\s\S]+?)\}\}/,
   :interpolation_pattern => /\{\{=([\s\S]+?)\}\}/,
-  :escape_pattern        => /\{\{-([\s\S]+?)\}\}/
+  :escape_pattern        => /\{\{-([\s\S]+?)\}\}/,
+  :interpolation_with_subtemplate_pattern => %r{
+    \{\{=(?<start>(?:(?!\}\})[\s\S])+\{)\s*\}\}
+    (?<middle>
+    (
+      (?<re>
+        \{\{=?(?:(?!\}\})[\s\S])+\{\s*\}\}
+        (?:
+          \{\{\s*\}(?:(?!\{\s*\}\})[\s\S])+\{\s*\}\}
+          |
+          \g<re>
+          |
+          .{1}
+        )*?
+        \{\{\s*\}[^\{]+?\}\}
+      )
+      |
+      .{1}
+    )*?
+    )
+    \{\{\s*(?<end>\}[\s\S]+?)\}\}
+  }xm
 }
 
 QUESTION_MARK_SYNTAX = {
   :evaluation_pattern    => /<\?([\s\S]+?)\?>/,
   :interpolation_pattern => /<\?=([\s\S]+?)\?>/,
-  :escape_pattern        => /<\?-([\s\S]+?)\?>/
+  :escape_pattern        => /<\?-([\s\S]+?)\?>/,
+  :interpolation_with_subtemplate_pattern => %r{
+    <\?=(?<start>(?:(?!\?>)[\s\S])+\{)\s*\?>
+    (?<middle>
+    (
+      (?<re>
+        <\?=?(?:(?!\?>)[\s\S])+\{\s*\?>
+        (?:
+          <\?\s*\}(?:(?!\{\s*\?>)[\s\S])+\{\s*\?>
+          |
+          \g<re>
+          |
+          .{1}
+        )*?
+        <\?\s*\}[^\{]+?\?>
+      )
+      |
+      .{1}
+    )*?
+    )
+    <\?\s*(?<end>\}[\s\S]+?)\?>
+  }xm
+
 }
 
-module TestHelper
-  def test(name, &block)
-    define_method("test #{name.inspect}", &block)
-  end
-end
 
-class EJSCompilationTest < Test::Unit::TestCase
-  extend TestHelper
-
+class EJSCompilationTest < Minitest::Test
+  
   test "compile" do
     result = EJS.compile("Hello <%= name %>")
+    
     assert_match FUNCTION_PATTERN, result
     assert_no_match(/Hello \<%= name %\>/, result)
   end
@@ -37,10 +74,10 @@ class EJSCompilationTest < Test::Unit::TestCase
     assert_match FUNCTION_PATTERN, braced_result
     assert_equal standard_result, braced_result
   end
+  
 end
 
-class EJSCustomPatternTest < Test::Unit::TestCase
-  extend TestHelper
+class EJSCustomPatternTest < Minitest::Test
 
   def setup
     @original_evaluation_pattern = EJS.evaluation_pattern
@@ -69,8 +106,7 @@ class EJSCustomPatternTest < Test::Unit::TestCase
   end
 end
 
-class EJSEvaluationTest < Test::Unit::TestCase
-  extend TestHelper
+class EJSEvaluationTest < Minitest::Test
 
   test "quotes" do
     template = "<%= thing %> is gettin' on my noives!"
