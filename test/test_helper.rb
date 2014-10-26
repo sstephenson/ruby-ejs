@@ -1,16 +1,63 @@
-# # To make testing/debugging easier, test within this source tree versus an
-# # installed gem
-# dir = File.dirname(__FILE__)
-# root = File.expand_path(File.join(dir, '..'))
-# lib = File.expand_path(File.join(root, 'lib'))
-#
-# $LOAD_PATH << lib
-
 require "minitest/autorun"
 require 'minitest/reporters'
-# require "mocha/setup"
-# require 'wankel'
 require "ejs"
+
+FUNCTION_PATTERN = /\A\s*function\s*\(.*?\)\s*\{(.*?)\}\Z/m
+
+BRACE_SYNTAX = {
+  :evaluation_pattern    => /\{\{([\s\S]+?)\}\}/,
+  :interpolation_pattern => /\{\{=([\s\S]+?)\}\}/,
+  :escape_pattern        => /\{\{-([\s\S]+?)\}\}/,
+  :interpolation_with_subtemplate_pattern => %r{
+    \{\{=(?<start>(?:(?!\}\})[\s\S])+\{)\s*\}\}
+    (?<middle>
+    (
+      (?<re>
+        \{\{=?(?:(?!\}\})[\s\S])+\{\s*\}\}
+        (?:
+          \{\{\s*\}(?:(?!\{\s*\}\})[\s\S])+\{\s*\}\}
+          |
+          \g<re>
+          |
+          .{1}
+        )*?
+        \{\{\s*\}[^\{]+?\}\}
+      )
+      |
+      .{1}
+    )*?
+    )
+    \{\{\s*(?<end>\}[\s\S]+?)\}\}
+  }xm
+}
+
+QUESTION_MARK_SYNTAX = {
+  :evaluation_pattern    => /<\?([\s\S]+?)\?>/,
+  :interpolation_pattern => /<\?=([\s\S]+?)\?>/,
+  :escape_pattern        => /<\?-([\s\S]+?)\?>/,
+  :interpolation_with_subtemplate_pattern => %r{
+    <\?=(?<start>(?:(?!\?>)[\s\S])+\{)\s*\?>
+    (?<middle>
+    (
+      (?<re>
+        <\?=?(?:(?!\?>)[\s\S])+\{\s*\?>
+        (?:
+          <\?\s*\}(?:(?!\{\s*\?>)[\s\S])+\{\s*\?>
+          |
+          \g<re>
+          |
+          .{1}
+        )*?
+        <\?\s*\}[^\{]+?\?>
+      )
+      |
+      .{1}
+    )*?
+    )
+    <\?\s*(?<end>\}[\s\S]+?)\?>
+  }xm
+
+}
 
 Minitest::Reporters.use! Minitest::Reporters::SpecReporter.new
 
