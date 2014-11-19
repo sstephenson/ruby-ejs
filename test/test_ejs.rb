@@ -170,6 +170,32 @@ class EJSEvaluationTest < Test::Unit::TestCase
     assert_equal "&#x27;Foo Bar&#x27;", EJS.evaluate(template, { :foobar => "'Foo Bar'" })
   end
 
+  test "escaping with conditions" do
+    params = { :foobar => "<b>Foo Bar</b>" }
+    safe_string = "&lt;b&gt;Foo Bar&lt;&#x2F;b&gt;"
+
+    template = "<%- true || foobar %>"
+    assert_equal "true", EJS.evaluate(template, params)
+
+    template = "<%- null || foobar %>"
+    assert_equal safe_string, EJS.evaluate(template, params)
+
+    template = "<%- false || foobar %>"
+    assert_equal safe_string, EJS.evaluate(template, params)
+
+    template = "<%- foobar || 'Foo & Bar' %>"
+    assert_equal safe_string, EJS.evaluate(template, params)
+
+    template = "<%- true ? foobar : 'foobar' %>"
+    assert_equal safe_string, EJS.evaluate(template, params)
+
+    template = "<%- false ? foobar : 'Foo & Bar' %>"
+    assert_equal "Foo &amp; Bar", EJS.evaluate(template, params)
+
+    template = "<%- true ? (false || 'Foo & Bar') : 'Foo' %>"
+    assert_equal "Foo &amp; Bar", EJS.evaluate(template, params)
+  end
+
   test "braced escaping" do
     template = "{{- foobar }}"
     assert_equal "&lt;b&gt;Foo Bar&lt;&#x2F;b&gt;", EJS.evaluate(template, { :foobar => "<b>Foo Bar</b>" }, BRACE_SYNTAX)
