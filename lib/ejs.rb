@@ -13,13 +13,13 @@ module EJS
     'u2029' => "\u2029"
   }
   JS_ESCAPES = JS_UNESCAPES.invert
-  JS_UNESCAPE_PATTERN = /\\(#{Regexp.union(JS_UNESCAPES.keys)})/
   JS_ESCAPE_PATTERN = Regexp.union(JS_ESCAPES.keys)
+  JS_UNESCAPE_PATTERN = /\\(#{Regexp.union(JS_UNESCAPES.keys)})/
 
   class << self
+    attr_accessor :escape_pattern
     attr_accessor :evaluation_pattern
     attr_accessor :interpolation_pattern
-    attr_accessor :escape_pattern
 
     # Compiles an EJS template to a JavaScript function. The compiled
     # function takes an optional argument, an object specifying local
@@ -95,7 +95,7 @@ module EJS
       end
   end
 
+  self.escape_pattern = /<%=([\s\S]+?)%>/
   self.evaluation_pattern = /<%([\s\S]+?)%>/
-  self.interpolation_pattern = /<%=([\s\S]+?)%>/
-  self.escape_pattern = /<%-([\s\S]+?)%>/
+  self.interpolation_pattern = /<%-([\s\S]+?)%>/
 end
