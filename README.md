@@ -1,4 +1,4 @@
-EJS (Embedded JavaScript) template compiler for Ruby
+EJS (Embedded JavaScript) template compiler for Ruby [![Circle CI](https://circleci.com/gh/malomalo/ruby-ejs.svg?style=svg)](https://circleci.com/gh/malomalo/ruby-ejs)
 ====================================================
 
 EJS templates embed JavaScript code inside `<% ... %>` tags, much like
