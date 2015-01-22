@@ -11,4 +11,5 @@ Gem::Specification.new do |s|
   s.authors = ["Sam Stephenson"]
   s.email = ["sstephenson@gmail.com"]
   s.homepage = "https://github.com/sstephenson/ruby-ejs/"
+  s.license = 'MIT'
 end
