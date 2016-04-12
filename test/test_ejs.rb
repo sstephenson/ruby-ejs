@@ -122,6 +122,11 @@ class EJSEvaluationTest < Test::Unit::TestCase
     assert_equal "This\n\t\tis: that.\n\tok.\nend.", EJS.evaluate(template, :x => "that")
   end
 
+  test "newlines and whitespaces between html tags" do
+    template = "<div>\t \t \n\t<div class=\"test\">\t\t\n\t  < span ><strong> <%= x %> </strong ></span>    \t\t\n\t  <% if(y) { %>\n\t  <span>that</span> text spaces and \n multilines \n\t\n should be kept \t\n\t  intact\n\t  <% } %>     \t\t\n  </div>\t\t\n\</div>\n"
+    assert_equal "<div><div class=\"test\">< span ><strong> this </strong ></span><span>that</span> text spaces and \n multilines \n\t\n should be kept \t\n\t  intact\n\t  </div></div>\n", EJS.evaluate(template, :x => "this", :y => true)
+  end
+
 
   test "braced iteration" do
     template = "<ul>{{ for (var i = 0; i < people.length; i++) { }}<li>{{= people[i] }}</li>{{ } }}</ul>"

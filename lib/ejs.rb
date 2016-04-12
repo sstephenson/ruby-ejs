@@ -34,6 +34,7 @@ module EJS
     def compile(source, options = {})
       source = source.dup
 
+      remove_html_trailing_whitespaces!(source)
       js_escape!(source)
       replace_escape_tags!(source, options)
       replace_interpolation_tags!(source, options)
@@ -57,6 +58,11 @@ module EJS
     end
 
     protected
+      def remove_html_trailing_whitespaces!(source)
+        source.gsub!(/>[[:space:]]*$[[:space:]]*</im, '><')
+        source
+      end
+
       def js_escape!(source)
         source.gsub!(JS_ESCAPE_PATTERN) { |match| '\\' + JS_ESCAPES[match] }
         source
