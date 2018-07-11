@@ -7,14 +7,16 @@ class CompilationTest < Minitest::Test
     
     assert_match FUNCTION_PATTERN, result
     assert_no_match(/Hello \<%= name %\>/, result)
-  end
-
-  test "compile with custom syntax" do
-    standard_result = EJS.compile("Hello <%= name %>")
-    braced_result   = EJS.compile("Hello {{= name }}", BRACE_SYNTAX)
-
-    assert_match FUNCTION_PATTERN, braced_result
-    assert_equal standard_result, braced_result
+    assert_equal(<<~JS.strip, result)
+      function(locals, escape) {
+          var __output = [], __append = __output.push.bind(__output);
+          with (locals || {}) {
+              __append(`Hello `);
+              __append(escape( name ));
+          }
+          return __output.join("");
+      }
+    JS
   end
   
 end

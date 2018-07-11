@@ -6,11 +6,11 @@ class SubtemplateTest < Minitest::Test
     template = <<-DATA
       <% formTag = function(template) { return '<form>\\n'+template()+'\\n</form>'; } %>
 
-      <%= formTag(function () { %>
+      <%- formTag(function () { %>
         <input type="submit" />
       <% }) %>
     DATA
-    
+
     assert_equal <<-DATA, EJS.evaluate(template)
       
 

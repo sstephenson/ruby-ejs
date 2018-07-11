@@ -4,16 +4,16 @@ class EvaluationTest < Minitest::Test
 
   test "quotes" do
     template = "<%= thing %> is gettin' on my noives!"
-    assert_equal "This is gettin' on my noives!", EJS.evaluate(template, :thing => "This")
+    assert_equal "This is gettin' on my noives!", EJS.evaluate(template, thing: "This")
   end
 
   test "backslashes" do
     template = "<%= thing %> is \\ridanculous"
-    assert_equal "This is \\ridanculous", EJS.evaluate(template, :thing => "This")
+    assert_equal "This is \\ridanculous", EJS.evaluate(template, thing: "This")
   end
 
   test "backslashes into interpolation" do
-    template = %q{<%= "Hello \"World\"" %>}
+    template = %q{<%- "Hello \"World\"" %>}
     assert_equal 'Hello "World"', EJS.evaluate(template)
   end
 
@@ -26,7 +26,7 @@ class EvaluationTest < Minitest::Test
     template = "<ul><%
       for (var i = 0; i < people.length; i++) {
     %><li><%= people[i] %></li><% } %></ul>"
-    result = EJS.evaluate(template, :people => ["Moe", "Larry", "Curly"])
+    result = EJS.evaluate(template, people: %w[Moe Larry Curly])
     assert_equal "<ul><li>Moe</li><li>Larry</li><li>Curly</li></ul>", result
   end
 
@@ -52,79 +52,18 @@ class EvaluationTest < Minitest::Test
     assert_equal "This\n\t\tis: that.\n\tok.\nend.", EJS.evaluate(template, :x => "that")
   end
 
-
-  test "braced iteration" do
-    template = "<ul>{{ for (var i = 0; i < people.length; i++) { }}<li>{{= people[i] }}</li>{{ } }}</ul>"
-    result = EJS.evaluate(template, { :people => ["Moe", "Larry", "Curly"] }, BRACE_SYNTAX)
-    assert_equal "<ul><li>Moe</li><li>Larry</li><li>Curly</li></ul>", result
-  end
-
-  test "braced quotes" do
-    template = "It's its, not it's"
-    assert_equal template, EJS.evaluate(template, {}, BRACE_SYNTAX)
-  end
-
-  test "braced quotes in statement and body" do
-    template = "{{ if(foo == 'bar'){ }}Statement quotes and 'quotes'.{{ } }}"
-    assert_equal "Statement quotes and 'quotes'.", EJS.evaluate(template, { :foo => "bar" }, BRACE_SYNTAX)
-  end
-
-
-  test "question-marked iteration" do
-    template = "<ul><? for (var i = 0; i < people.length; i++) { ?><li><?= people[i] ?></li><? } ?></ul>"
-    result = EJS.evaluate(template, { :people => ["Moe", "Larry", "Curly"] }, QUESTION_MARK_SYNTAX)
-    assert_equal "<ul><li>Moe</li><li>Larry</li><li>Curly</li></ul>", result
-  end
-
-  test "question-marked quotes" do
-    template = "It's its, not it's"
-    assert_equal template, EJS.evaluate(template, {}, QUESTION_MARK_SYNTAX)
-  end
-
-  test "question-marked quote in statement and body" do
-    template = "<? if(foo == 'bar'){ ?>Statement quotes and 'quotes'.<? } ?>"
-    assert_equal "Statement quotes and 'quotes'.", EJS.evaluate(template, { :foo => "bar" }, QUESTION_MARK_SYNTAX)
-  end
-
   test "escaping" do
-    template = "<%- foobar %>"
-    assert_equal "&lt;b&gt;Foo Bar&lt;&#x2F;b&gt;", EJS.evaluate(template, { :foobar => "<b>Foo Bar</b>" })
+    template = "<%= foobar %>"
+    assert_equal "&#60;b&#62;Foo Bar&#60;&#47;b&#62;", EJS.evaluate(template, foobar: "<b>Foo Bar</b>")
 
-    template = "<%- foobar %>"
-    assert_equal "Foo &amp; Bar", EJS.evaluate(template, { :foobar => "Foo & Bar" })
+    template = "<%= foobar %>"
+    assert_equal "Foo &#38; Bar", EJS.evaluate(template, { :foobar => "Foo & Bar" })
 
-    template = "<%- foobar %>"
-    assert_equal "&quot;Foo Bar&quot;", EJS.evaluate(template, { :foobar => '"Foo Bar"' })
+    template = "<%= foobar %>"
+    assert_equal "&#34;Foo Bar&#34;", EJS.evaluate(template, { :foobar => '"Foo Bar"' })
 
-    template = "<%- foobar %>"
-    assert_equal "&#x27;Foo Bar&#x27;", EJS.evaluate(template, { :foobar => "'Foo Bar'" })
+    template = "<%= foobar %>"
+    assert_equal "&#39;Foo Bar&#39;", EJS.evaluate(template, { :foobar => "'Foo Bar'" })
   end
 
-  test "braced escaping" do
-    template = "{{- foobar }}"
-    assert_equal "&lt;b&gt;Foo Bar&lt;&#x2F;b&gt;", EJS.evaluate(template, { :foobar => "<b>Foo Bar</b>" }, BRACE_SYNTAX)
-
-    template = "{{- foobar }}"
-    assert_equal "Foo &amp; Bar", EJS.evaluate(template, { :foobar => "Foo & Bar" }, BRACE_SYNTAX)
-
-    template = "{{- foobar }}"
-    assert_equal "&quot;Foo Bar&quot;", EJS.evaluate(template, { :foobar => '"Foo Bar"' }, BRACE_SYNTAX)
-
-    template = "{{- foobar }}"
-    assert_equal "&#x27;Foo Bar&#x27;", EJS.evaluate(template, { :foobar => "'Foo Bar'" }, BRACE_SYNTAX)
-  end
-
-  test "question-mark escaping" do
-    template = "<?- foobar ?>"
-    assert_equal "&lt;b&gt;Foo Bar&lt;&#x2F;b&gt;", EJS.evaluate(template, { :foobar => "<b>Foo Bar</b>" }, QUESTION_MARK_SYNTAX)
-
-    template = "<?- foobar ?>"
-    assert_equal "Foo &amp; Bar", EJS.evaluate(template, { :foobar => "Foo & Bar" }, QUESTION_MARK_SYNTAX)
-
-    template = "<?- foobar ?>"
-    assert_equal "&quot;Foo Bar&quot;", EJS.evaluate(template, { :foobar => '"Foo Bar"' }, QUESTION_MARK_SYNTAX)
-
-    template = "<?- foobar ?>"
-    assert_equal "&#x27;Foo Bar&#x27;", EJS.evaluate(template, { :foobar => "'Foo Bar'" }, QUESTION_MARK_SYNTAX)
-  end
 end
