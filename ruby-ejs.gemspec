@@ -1,11 +1,11 @@
 Gem::Specification.new do |s|
   s.name = "ruby-ejs"
-  s.version = "1.0.0"
+  s.version = "1.0.1"
   s.licenses    = ['MIT']
   s.summary = "EJS (Embedded JavaScript) template compiler"
   s.description = "Compile EJS (Embedded JavaScript) templates in Ruby."
 
-  s.files = Dir["README.md", "LICENSE", "lib/**/*.rb"]
+  s.files = Dir["README.md", "LICENSE", "lib/**/*.{rb,js}"]
 
   s.add_development_dependency "rake"
   s.add_development_dependency "bundler"
