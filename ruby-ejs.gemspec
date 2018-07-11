@@ -1,6 +1,7 @@
 Gem::Specification.new do |s|
-  s.name = "ejs"
-  s.version = "2.0.0"
+  s.name = "ruby-ejs"
+  s.version = "1.0.0"
+  s.licenses    = ['MIT']
   s.summary = "EJS (Embedded JavaScript) template compiler"
   s.description = "Compile EJS (Embedded JavaScript) templates in Ruby."
 
@@ -12,7 +13,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency "minitest-reporters"
   s.add_development_dependency "execjs"
 
-  s.authors = ["Sam Stephenson"]
-  s.email = ["sstephenson@gmail.com"]
-  s.homepage = "https://github.com/sstephenson/ruby-ejs/"
+  s.authors = ["Jonathan Bracy"]
+  s.email = ["jonbracy@gmail.com"]
+  s.homepage = "https://github.com/malomalo/ruby-ejs"
 end

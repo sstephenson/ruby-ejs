@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    ejs (2.0.0)
+    ruby-ejs (1.0.0)
 
 GEM
   remote: https://rubygems.org/
@@ -23,11 +23,11 @@ PLATFORMS
 
 DEPENDENCIES
   bundler
-  ejs!
   execjs
   minitest
   minitest-reporters
   rake
+  ruby-ejs!
 
 BUNDLED WITH
    1.16.0

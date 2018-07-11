@@ -19,7 +19,7 @@ module EJS
     escape: nil
   }
   
-  ASSET_DIR = File.join(__dir__, 'assets')
+  ASSET_DIR = File.join(__dir__, 'ruby', 'ejs', 'assets')
   
   class << self
     
