@@ -42,8 +42,10 @@ module EJS
         "import {escape} from 'ejs';\n"
       end
       
+      fs = function_source(source, options)
+      output << fs[1]
       output << "export default function (locals) {\n"
-      output << function_source(source, options)
+      output << fs[0]
       output << "}"
 
       output
@@ -53,7 +55,7 @@ module EJS
       options = default(options)
       
       output = "function(locals, escape) {\n"
-      output << function_source(source, options)
+      output << function_source(source, options)[0]
       output << "}"
       output
     end
@@ -222,8 +224,9 @@ module EJS
 
       def function_source(source, options)
         stack = []
+        imports = ""
         output =  "    var __output = [], __append = __output.push.bind(__output);\n"
-        output << "    with (locals || {}) {\n"
+        output << "    with (locals || {}) {\n" unless options[:strict]
 
         digest(source, options) do |segment, type, modifier|
           if type == :js
@@ -257,7 +260,13 @@ module EJS
               when :unescape
                 output << "        __append(" << segment << ");\n"
               else
-                output << "        " << segment << "\n"
+                if segment =~ /\A\s*import/
+                  imports << segment.strip
+                  imports << ';' unless segment =~ /;\s*\Z/
+                  imports << "\n"
+                else
+                  output << "        " << segment << "\n"
+                end
               end
             end
           elsif segment.length > 0
@@ -265,10 +274,11 @@ module EJS
           end
         end
 
-        output << "    }\n"
+        output << "    }\n" unless options[:strict]
         output << "    return __output.join(\"\");\n"
-
-        output
+        imports << "\n"
+        
+        [output, imports]
       end
       
   end
