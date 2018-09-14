@@ -22,18 +22,18 @@ class ImportTest < Minitest::Test
     export default function (locals) {
         var __output = [], __append = __output.push.bind(__output);
         with (locals || {}) {
-            __append(`      `);
-            __append(`\\n      `);
-            __append(`\\n      \\n      `);
+            __append("      ");
+            __append("\\n      ");
+            __append("\\n      \\n      ");
              formTag = function(template) { return '<form>\\n'+template()+'\\n</form>'; } 
-            __append(`\\n\\n      `);
+            __append("\\n\\n      ");
             __append( formTag(function () { 
                 var __output = [], __append = __output.push.bind(__output);
-            __append(`\\n        <input type="submit" />\\n      `);
+            __append("\\n        <input type=\\"submit\\" />\\n      ");
 
                 return __output.join("");
      })         );
-            __append(`\\n`);
+            __append("\\n");
         }
         return __output.join("");
     }

@@ -270,7 +270,7 @@ module EJS
               end
             end
           elsif segment.length > 0
-            output << "        __append(`" + segment.gsub("\\"){"\\\\"}.gsub(/\n/, '\\n').gsub(/\r/, '\\r') + "`);\n"
+            output << '        __append("' + segment.gsub("\\"){"\\\\"}.gsub(/\n/, '\\n').gsub(/\r/, '\\r').gsub('"', '\\"') + "\");\n"
           end
         end
 

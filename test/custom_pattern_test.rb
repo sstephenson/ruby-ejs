@@ -28,7 +28,7 @@ class CustomPatternTest < Minitest::Test
       function(locals, escape) {
           var __output = [], __append = __output.push.bind(__output);
           with (locals || {}) {
-              __append(`Hello `);
+              __append("Hello ");
               __append(escape( name ));
           }
           return __output.join("");
