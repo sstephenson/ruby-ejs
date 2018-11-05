@@ -230,7 +230,9 @@ module EJS
 
         digest(source, options) do |segment, type, modifier|
           if type == :js
-            if segment.match(/\A\s*\}/m)
+            if segment.match(/\A\s*\}.*\{\s*\Z/m)
+              output << "        " << segment << "\n"
+            elsif segment.match(/\A\s*\}/m)
               case stack.pop
               when :escape
                 output << "\n            return __output.join(\"\");\n"
