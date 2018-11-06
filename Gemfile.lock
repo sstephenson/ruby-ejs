@@ -1,0 +1,33 @@
+PATH
+  remote: .
+  specs:
+    ruby-ejs (1.1.0)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    ansi (1.5.0)
+    builder (3.2.2)
+    execjs (2.7.0)
+    minitest (5.11.3)
+    minitest-reporters (1.2.0)
+      ansi
+      builder
+      minitest (>= 5.0)
+      ruby-progressbar
+    rake (12.3.1)
+    ruby-progressbar (1.9.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  bundler
+  execjs
+  minitest
+  minitest-reporters
+  rake
+  ruby-ejs!
+
+BUNDLED WITH
+   1.16.0
